@@ -1453,18 +1453,6 @@ void GdiPlusPaintEx::beginPaint(HDC hDC, const FCRect& wRect, const FCRect& pRec
 	m_hDC = hDC;
 	m_opacity = 1;
 	m_resourcePath = L"";
-	if(m_useCloud){
-		//m_cloudInfos.clear();
-		CloudInfo ci;
-        ci.m_type = L"0";
-        ci.m_param1 = wRect.right - wRect.left;
-		DWORD time2 = ::GetTickCount();
-        ci.m_param3 = (int)(time2 - m_startTime);
-        ci.m_param2 = wRect.bottom - wRect.top;
-        ci.m_font = L"";
-        ci.m_lineWidth = 0;
-        m_cloudInfos.push_back(ci);
-	}
 }
 
 void GdiPlusPaintEx::beginPath(){
@@ -1568,20 +1556,6 @@ void GdiPlusPaintEx::drawEllipse(Long dwPenColor, float width, int style, const 
 	//m_g->SetSmoothingMode(SmoothingModeAntiAlias);
     m_g->DrawEllipse(getPen(dwPenColor, width, style), gdiPlusRect);
 	//m_g->SetSmoothingMode(SmoothingModeNone);
-
-	if (m_useCloud)
-    {
-        CloudInfo ci;
-        ci.m_type = L"6";
-        Color color = getGdiPlusColor(dwPenColor);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = width;
-        m_cloudInfos.push_back(ci);
-    }
 }
 
 void GdiPlusPaintEx::drawDotLine(Long dwPenColor, const FCPoint& p1, const FCPoint& p2){
@@ -1819,18 +1793,6 @@ void GdiPlusPaintEx::drawLine(Long dwPenColor, float width, int style, int x1, i
 	//m_g->SetSmoothingMode(SmoothingModeAntiAlias);
 	m_g->DrawLine(getPen(dwPenColor, width, style), lx1, ly1, lx2, ly2);
 	//m_g->SetSmoothingMode(SmoothingModeNone);
-	if (m_useCloud) {
-		CloudInfo ci;
-		ci.m_type = L"1";
-		Color color = getGdiPlusColor(dwPenColor);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = lx1;
-		ci.m_param2 = ly1;
-		ci.m_param3 = lx2;
-		ci.m_param4 = ly2;
-		ci.m_lineWidth = width;
-		m_cloudInfos.push_back(ci);
-	}
 }
 
 void GdiPlusPaintEx::drawPath(Long dwPenColor, float width, int style){
@@ -1883,24 +1845,6 @@ void GdiPlusPaintEx::drawPolyline(Long dwPenColor, float width, int style, FCPoi
 		}
 		Point newPoint(x, y);
 		points[i] = newPoint;
-		if (m_useCloud)
-        {
-            if (i > 0)
-            {
-                CloudInfo ci;
-                ci.m_type = L"1";
-                Color color = getGdiPlusColor(dwPenColor);
-                ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-                ci.m_param1 = x;
-                ci.m_param2 = y;
-                ci.m_param3 = lx;
-                ci.m_param4 = ly;
-                ci.m_lineWidth = width;
-                m_cloudInfos.push_back(ci);
-            }
-            lx = x;
-            ly = y;
-        }
 	}
 	//m_g->SetSmoothingMode(SmoothingModeAntiAlias);
 	m_g->DrawLines(getPen(dwPenColor, width, style), points, cpt);
@@ -1924,19 +1868,6 @@ void GdiPlusPaintEx::drawRect(Long dwPenColor, float width, int style, const FCR
 	affectScaleFactor(&gdiPlusRect);
 	//m_g->SetSmoothingMode(SmoothingModeNone);
     m_g->DrawRectangle(getPen(dwPenColor, width, style), gdiPlusRect);
-
-	if (m_useCloud) {
-		CloudInfo ci;
-        ci.m_type = L"2";
-        Color color = getGdiPlusColor(dwPenColor);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = width;
-        m_cloudInfos.push_back(ci);
-	}
 }
 
 void GdiPlusPaintEx::drawRoundRect(Long dwPenColor, float width, int style, const FCRect& rect, int cornerRadius){
@@ -1957,18 +1888,6 @@ void GdiPlusPaintEx::drawRoundRect(Long dwPenColor, float width, int style, cons
 	else{
 		//m_g->SetSmoothingMode(SmoothingModeNone);
 		m_g->DrawRectangle(getPen(dwPenColor, width, style), gdiPlusRect);
-	}
-	if (m_useCloud) {
-		CloudInfo ci;
-        ci.m_type = L"2";
-        Color color = getGdiPlusColor(dwPenColor);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = width;
-        m_cloudInfos.push_back(ci);
 	}
 }
 
@@ -2002,20 +1921,6 @@ void GdiPlusPaintEx::drawText(String strText, Long dwPenColor, FCFont *font, con
 		if(width == -1){
 			PointF gdiPlusPoint((REAL)(rect.left + m_offsetX), (REAL)(rect.top + m_offsetY));
 			m_g->DrawString(strText.c_str(), -1, gdiFont, gdiPlusPoint, m_emptyStringFormat, getBrush(dwPenColor));
-
-			if (m_useCloud)
-            {
-                CloudInfo ci;
-                ci.m_type = L"4";
-                Color color = getGdiPlusColor(dwPenColor);
-                ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-                ci.m_param1 = gdiPlusPoint.X;
-                ci.m_str = strText;
-                ci.m_param2 = gdiPlusPoint.Y;
-				ci.m_font = FCTran::fontToStr(font);
-                ci.m_lineWidth = 1;
-                m_cloudInfos.push_back(ci);
-            }
 		}else{
 			RectF gdiRect((REAL)(rect.left + m_offsetX), (REAL)(rect.top + m_offsetY), (REAL)(rect.right - rect.left), (REAL)(rect.bottom - rect.top));
 			m_g->DrawString(strText.c_str(), -1, gdiFont, gdiRect, m_emptyStringFormat, getBrush(dwPenColor));
@@ -2066,20 +1971,6 @@ void GdiPlusPaintEx::drawTextEx(String strText, Long dwPenColor, FCFont *font, c
 		m_g->DrawString(strText.c_str(), -1, gdiFont, bkPoint, m_emptyStringFormat, getBrush(FCColor::rgba(r, g, b, (int)(a * 0.2))));
 		m_g->Restore(state);
 		m_g->DrawString(strText.c_str(), -1, gdiFont, gdiPlusPoint, m_emptyStringFormat, getBrush(dwPenColor));
-
-		if (m_useCloud)
-        {
-            CloudInfo ci;
-            ci.m_type = L"4";
-            Color color = getGdiPlusColor(dwPenColor);
-            ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-            ci.m_param1 = gdiPlusPoint.X;
-            ci.m_str = strText;
-            ci.m_param2 = gdiPlusPoint.Y;
-			ci.m_font = FCTran::fontToStr(font);
-            ci.m_lineWidth = 1;
-            m_cloudInfos.push_back(ci);
-        }
 		delete gdiFont;
 		gdiFont = 0;
 	}
@@ -2115,20 +2006,6 @@ void GdiPlusPaintEx::drawText(String strText, Long dwPenColor, FCFont *font, con
 		if(width == -1){
 			PointF gdiPlusPoint((REAL)(rect.left + m_offsetX), (REAL)(rect.top + m_offsetY));
 			m_g->DrawString(strText.c_str(), -1, gdiFont, gdiPlusPoint, m_emptyStringFormat, getBrush(dwPenColor));
-
-			if (m_useCloud)
-            {
-                CloudInfo ci;
-                ci.m_type = L"4";
-                Color color = getGdiPlusColor(dwPenColor);
-                ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-                ci.m_param1 = gdiPlusPoint.X;
-                ci.m_str = strText;
-                ci.m_param2 = gdiPlusPoint.Y;
-				ci.m_font = FCTran::fontToStr(font);
-                ci.m_lineWidth = 1;
-                m_cloudInfos.push_back(ci);
-            }
 		}else{
 			RectF gdiRect((REAL)(rect.left + m_offsetX), (REAL)(rect.top + m_offsetY), (REAL)(rect.right - rect.left), (REAL)(rect.bottom - rect.top));
 			m_g->DrawString(strText.c_str(), -1, gdiFont, gdiRect, m_emptyStringFormat, getBrush(dwPenColor));
@@ -2167,19 +2044,6 @@ void GdiPlusPaintEx::drawTextAutoEllipsis(String strText, Long dwPenColor, FCFon
 		RectF fRect((REAL)gdiPlusRect.X, (REAL)gdiPlusRect.Y, (REAL)gdiPlusRect.Width, (REAL)gdiPlusRect.Height);
 		Gdiplus::Font *gdiFont = getFont(font);
         m_g->DrawString(strText.c_str(), -1, gdiFont, fRect, m_emptyStringFormat, getBrush(dwPenColor));
-		if (m_useCloud)
-        {
-            CloudInfo ci;
-            ci.m_type = L"4";
-            Color color = getGdiPlusColor(dwPenColor);
-            ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-            ci.m_param1 = fRect.GetLeft();
-            ci.m_str = strText;
-            ci.m_param2 = fRect.GetTop();
-			ci.m_font = FCTran::fontToStr(font);
-            ci.m_lineWidth = 1;
-            m_cloudInfos.push_back(ci);
-        }
 		delete gdiFont;
 		gdiFont = 0;
     }
@@ -2296,19 +2160,6 @@ void GdiPlusPaintEx::fillEllipse(Long dwPenColor, const FCRect& rect){
 	//m_g->SetSmoothingMode(SmoothingModeAntiAlias);
 	m_g->FillEllipse(getBrush(dwPenColor), gdiPlusRect);
 	//m_g->SetSmoothingMode(SmoothingModeNone);
-	if (m_useCloud)
-    {
-        CloudInfo ci;
-        ci.m_type = L"7";
-        Color color = getGdiPlusColor(dwPenColor);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = 0;
-        m_cloudInfos.push_back(ci);
-    }
 }
 
 void GdiPlusPaintEx::fillGradientEllipse(Long dwFirst, Long dwSecond, const FCRect& rect, int angle){
@@ -2322,19 +2173,6 @@ void GdiPlusPaintEx::fillGradientEllipse(Long dwFirst, Long dwSecond, const FCRe
     //m_g->SetSmoothingMode(SmoothingModeAntiAlias);
 	m_g->FillEllipse(&lgb, gdiPlusRect);
 	//m_g->SetSmoothingMode(SmoothingModeNone);
-	if (m_useCloud)
-    {
-        CloudInfo ci;
-        ci.m_type = L"7";
-        Color color = getGdiPlusColor(dwFirst);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = 0;
-        m_cloudInfos.push_back(ci);
-    }
 }
 
 void GdiPlusPaintEx::fillGradientPath(Long dwFirst, Long dwSecond, const FCRect& rect, int angle){
@@ -2412,18 +2250,6 @@ void GdiPlusPaintEx::fillGradientRect(Long dwFirst, Long dwSecond, const FCRect&
 	else{
 		m_g->FillRectangle(&lgb, gdiPlusRect);
 	}
-	if (m_useCloud) {
-		CloudInfo ci;
-        ci.m_type = L"3";
-        Color color = getGdiPlusColor(dwFirst);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = 0;
-        m_cloudInfos.push_back(ci);
-	}
 }
 
 void GdiPlusPaintEx::fillPath(Long dwPenColor){
@@ -2474,19 +2300,6 @@ void GdiPlusPaintEx::fillRect(Long dwPenColor, int left, int top, int right, int
 	affectScaleFactor(&gdiPlusRect);
 	//m_g->SetSmoothingMode(SmoothingModeNone);
 	m_g->FillRectangle(getBrush(dwPenColor), gdiPlusRect);
-
-	if (m_useCloud) {
-		CloudInfo ci;
-        ci.m_type = L"3";
-        Color color = getGdiPlusColor(dwPenColor);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = 0;
-        m_cloudInfos.push_back(ci);
-	}
 }
 
 void GdiPlusPaintEx::fillRoundRect(Long dwPenColor, const FCRect& rect, int cornerRadius){
@@ -2503,19 +2316,6 @@ void GdiPlusPaintEx::fillRoundRect(Long dwPenColor, const FCRect& rect, int corn
 	else{
 		m_g->SetSmoothingMode(SmoothingModeNone);
 		m_g->FillRectangle(getBrush(dwPenColor), gdiPlusRect);
-	}
-
-	if (m_useCloud) {
-		CloudInfo ci;
-        ci.m_type = L"3";
-        Color color = getGdiPlusColor(dwPenColor);
-		ci.m_color = FCTran::colorToStr(FCColor::rgba(color.GetR(), color.GetG(), color.GetB(), color.GetA()));
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-        ci.m_lineWidth = 0;
-        m_cloudInfos.push_back(ci);
 	}
 }
 
@@ -2554,15 +2354,6 @@ void GdiPlusPaintEx::setClip(const FCRect& rect){
         gdiPlusRect.Height = (int)ceil(gdiPlusRect.Height * m_scaleFactorY);
     }
 	m_g->SetClip(gdiPlusRect);
-	if (m_useCloud) {
-		CloudInfo ci;
-		ci.m_type = L"5";
-		ci.m_param1 = gdiPlusRect.GetLeft();
-		ci.m_param2 = gdiPlusRect.GetTop();
-		ci.m_param3 = gdiPlusRect.GetRight();
-		ci.m_param4 = gdiPlusRect.GetBottom();
-		m_cloudInfos.push_back(ci);
-	}
 }
 
 void GdiPlusPaintEx::setLineCap(int startLineCap, int endLineCap){

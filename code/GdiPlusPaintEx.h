@@ -140,27 +140,6 @@ public:
     static String getSystemFont();
 };
 
-class CloudInfo {
-public:
-    String m_type;
-    String m_color;
-    String m_font;
-    float m_lineWidth;
-    int m_param1;
-    int m_param2;
-    int m_param3;
-    int m_param4;
-    String m_str;
-public:
-	CloudInfo(){
-		m_lineWidth = 1;
-		m_param1 = 0;
-		m_param2 = 0;
-		m_param3 = 0;
-		m_param4 = 0;
-	}
-};
-
 class GdiPlusPaintEx : public FCPaint {
 public:
 	Bitmap *m_bitmap;
@@ -200,7 +179,6 @@ protected:
 public:
 	GdiPlusPaintEx();
 	virtual ~GdiPlusPaintEx();
-	vector<CloudInfo> m_cloudInfos;
 	DWORD m_startTime;
 	bool m_useCloud;
 public:
